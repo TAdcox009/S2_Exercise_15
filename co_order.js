@@ -35,6 +35,15 @@ window.addEventListener("load", function () {
 
       // Calculate the cost of the order.
       calcOrder();
+
+      // Event handlers for the web form
+      orderForm.elements.model.onchange = calcOrder;
+      orderForm.elements.qty.onchange = calcOrder;
+
+      var planOptions = document.querySelectorAll('input[name="protection"]');
+      for (var i = 0; i < planOptions.length; i++) {
+            planOptions[i].onclick = calcOrder;
+      }
 });
 
 function calcOrder() {
@@ -48,20 +57,38 @@ function calcOrder() {
 
       // Initial cost = model x quantity.
       var initialCost = mCost * quantity;
-      orderForm.elements.initialCost.value = initialCost;
+      orderForm.elements.initialCost.value = formatUSACurrency(initialCost);
 
       // Retrieve the cost of the user's protection plan.
       var pCost = document.querySelector('input[name="protection"]:checked').value * quantity;
-      orderForm.elements.protectionCost.value = pCost;
+      orderForm.elements.protectionCost.value = formatNumer(pCost, 2);
 
       // Calculate the order subtotal.
-      orderForm.elements.subtotal.value = initialCost + pCost;
+      orderForm.elements.subtotal.value = formatNumer(initialCost + pCost, 2);
 
       // Calculate the sales tax.
       var salesTax = 0.05 * (initialCost + pCost);
-      orderForm.elements.salesTax.value = salesTax;
+      orderForm.elements.salesTax.value = formatNumer(salesTax, 2);
 
       // Calculate the cost of the total order.
       var totalCost = initialCost + pCost + salesTax;
-      orderForm.elements.totalCost.value = totalCost;
+      orderForm.elements.totalCost.value = formatUSACurrency(totalCost);
+
+      // Stores the order details.
+      orderForm.elements.modelName.value = orderForm.elements.model.options[mIndex].text;
+      orderForm.elements.protectionName.value = document.querySelector('input[name="protection"]:checked').nextSibling.nodeValue;
+}
+
+function formatNumer(val, decimals) {
+      return val.toLocaleString(undefined, {
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals
+      });
+}
+
+function formatUSACurrency(val) {
+      return val.toLocaleString('en-US', {
+            style: "currency",
+            currency: "USD"
+      });
 }
